@@ -1,61 +1,52 @@
 const sections = Array.from(document.getElementsByTagName('section'));
-const title = document.getElementById('title');
-const navBarList = document.getElementById("navbar__list");
-/**
- * onWindowScroll() sets the active section and active navigation bar link on scroll
- */
-function scrollOnClick(element){
-  $('html,body').animate({scrollTop: target ? target.offset().top : 0}, 'slow');
+sections.unshift(document.getElementById('title'));
+const navBarList = document.getElementById('navbar__list');
+const elementPosition = [];
+//Creating Dynamic Navigation Bar
+function renderNavBar(){
+  sections.forEach(section=>{
+    let i=0;
+    const newLink = document.createElement('li');
+    newLink.className= `navLink ${section.id}`;
+    newLink.innerHTML = section.dataset.nav;
+    newLink.onclick =()=> windowScroll(section);
+    navbar__list.appendChild(newLink);
+    elementPosition.push(section.offsetTop);
+    i+=1;
+  });
 }
 
-
-function onWindowScroll(){
-  title.classList.remove("your-active-class");
-  sections.forEach(section =>section.classList.remove("your-active-class"));  
-  //document.getElementsByClassName("navLink").classList.remove('navActive');
-  if(elementInViewPort(title)){
-    navBarList.childNodes[0].classList.add("navActive");
-    title.classList.add("your-active-class");    
-  }
-  else{
-    const activeIndex = sections.findIndex(section => isElementInViewport(section.childNodes[1].childNodes[1]));
-    const activeSection = sections[activeIndex];
-    const activeLink = navbarList.childNodes[activeIndex + 1];
-    activeSection && activeSection.classList.add('section-active');
-    activeLink && activeLink.classList.add('navbar-active');
-    navbarList.childNodes.forEach((navLink, index) =>
-      index !== (activeIndex + 1) && navLink.classList.remove('navbar-active'));
-  }}
-;
-
-/**
- * Checks if the element is inside the viewport.
- *
- * @param element: HTML element to check
- * @returns {boolean}
- */function elementInViewPort(element){
-  const rect = element.getBoundingClientRect();
-  if(rect.top>=0 && (rect.bottom<=window.innerHeight || document.documentElement.innerHeight)){
-   return true; 
-  };
+//Check if element is in viewport
+function inViewPort(element){
+const bounding = element.getBoundingClientRect();
+  return(
+    bounding.top >= 0 &&
+    bounding.bottom <= (window.innerHeight+20 || document.documentElement.clientHeight)
+  );
+}
+    
+//To scroll on navigation bar click
+function windowScroll(element){
+  element.scrollIntoView({behavior: "smooth", block: "end", inline: "nearest"});  
 };
 
-window.onscroll = onWindowScroll;
-function renderNav(){
-  const homeLink = document.createElement('li');
-  homeLink.innerHTML = 'Home';
-  homeLink.className = 'navLink';
-  homeLink.onclick= () => scrollOnClick(`#title`);
-  navbar__list.appendChild(homeLink);
-  sections.forEach(section => {
-    const newItem = document.createElement('li');
-    newItem.innerHTML = section.dataset.nav;
-    newItem.className = 'navLink';  
-    newItem.onclick= () => scrollOnClick(`#${section.id}`);
-    navbar__list.appendChild(newItem);}
-    );
+//active section and navigation link on scroll
+function onWindowScroll(){
+  sections.forEach(section => section.classList.remove("your-active-class"));
+  navBarList.childNodes.forEach(navLink => navLink.classList.remove("navActive"));
+  for(const section of sections){
+    section.classList.remove("navAction")
+    const activeIndex = sections.findIndex(section => inViewPort(section));
+    console.log(activeIndex);
+    const activeSection = sections[activeIndex];
+    const activeLink = navBarList.childNodes[activeIndex];
+    activeSection && activeSection.classList.add("your-active-class");
+    activeLink && activeLink.classList.add("navActive");
+  }
 }
 
-renderNav();
-//calls onWindowScroll() when window is scrolled
-onWindowScroll();
+renderNavBar();
+//to make home link active in starting
+navBarList.childNodes[0].classList.add("navActive");
+document.addEventListener('scroll', onWindowScroll);
+
